@@ -1,0 +1,65 @@
+name: Sync Interface Files to ETL Repository
+
+on:
+  push:
+    paths:
+      - 'output/interfaces/**'
+    branches:
+      - main
+      - master
+
+jobs:
+  sync-files:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout source repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Checkout target repository
+      uses: actions/checkout@v4
+      with:
+        repository: raghadafghani/Repo-B
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        path: target-repo
+    
+    - name: Copy interface files
+      run: |
+        # Create target directory if it doesn't exist
+        mkdir -p target-repo/app/mapping
+        
+        # Copy all JSON files from source to target
+        cp output/interfaces/*.json target-repo/app/mapping/
+        
+        # List copied files for verification
+        echo "Files copied:"
+        ls -la target-repo/app/mapping/
+    
+    - name: Commit and push changes
+      run: |
+        cd target-repo
+        
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Add changes
+        git add app/mapping/*.json
+        
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          # Commit changes
+          git commit -m "Auto-sync: Update interface files from ModelDeploy
+          
+          Updated files:
+          $(git diff --name-only HEAD~1 HEAD | grep 'app/mapping' || echo 'New files added')"
+          
+          # Push changes
+          git push
+          
+          echo "Successfully synced interface files to ETL repository"
+        fi
