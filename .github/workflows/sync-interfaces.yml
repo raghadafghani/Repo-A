@@ -6,7 +6,6 @@ on:
       - 'output/interfaces/**'
     branches:
       - main
-      - master
 
 jobs:
   sync-files:
@@ -14,12 +13,12 @@ jobs:
     
     steps:
     - name: Checkout source repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
     
     - name: Checkout target repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: raghadafghani/Repo-B
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
